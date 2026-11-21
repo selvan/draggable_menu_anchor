@@ -1,0 +1,20 @@
+name: draggable_menu_anchor
+description: >-
+  A MenuAnchor-style pop-up you can drag around. Built on Flutter's
+  RawMenuAnchor: opens at the tap point with MenuAnchor's placement rules,
+  stays inside the screen while dragged, and closes on an outside tap.
+version: 0.2.0
+publish_to: none
+
+environment:
+  sdk: '^3.8.0'
+  flutter: ">=3.32.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
