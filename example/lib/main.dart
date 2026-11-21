@@ -280,7 +280,7 @@ class DemoPanel extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   itemCount: 12,
-                  separatorBuilder: (_, __) => const SizedBox(width: 6),
+                  separatorBuilder: (_, _) => const SizedBox(width: 6),
                   itemBuilder: (_, i) => Chip(label: Text('Item ${i + 1}')),
                 ),
               ),

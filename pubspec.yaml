@@ -1,10 +1,17 @@
 name: draggable_menu_anchor
 description: >-
-  A MenuAnchor-style pop-up you can drag around. Built on Flutter's
-  RawMenuAnchor: opens at the tap point with MenuAnchor's placement rules,
-  stays inside the screen while dragged, and closes on an outside tap.
+  A MenuAnchor-style pop-up you can drag around: opens at the tap with
+  MenuAnchor's placement rules, stays on screen, closes on an outside tap.
 version: 0.2.0
-publish_to: none
+homepage: https://github.com/selvan/draggable_menu_anchor
+repository: https://github.com/selvan/draggable_menu_anchor
+issue_tracker: https://github.com/selvan/draggable_menu_anchor/issues
+topics:
+  - menu
+  - popup
+  - draggable
+  - overlay
+  - widget
 
 environment:
   sdk: '^3.8.0'
@@ -17,4 +24,4 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0

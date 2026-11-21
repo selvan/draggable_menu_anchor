@@ -30,12 +30,15 @@ menus are Flutter's; this package adds placement, size limits and dragging.
 
 ## Install
 
-The package isn't published to pub.dev. Add it as a path (or git) dependency:
+```bash
+flutter pub add draggable_menu_anchor
+```
+
+or in `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  draggable_menu_anchor:
-    path: ../studio_flutter_packages/packages/draggable_menu_anchor
+  draggable_menu_anchor: ^0.2.0
 ```
 
 ```dart
