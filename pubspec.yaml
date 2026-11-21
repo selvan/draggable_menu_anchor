@@ -2,7 +2,7 @@ name: draggable_menu_anchor
 description: >-
   A MenuAnchor-style pop-up you can drag around: opens at the tap with
   MenuAnchor's placement rules, stays on screen, closes on an outside tap.
-version: 0.2.0
+version: 1.0.1
 homepage: https://github.com/selvan/draggable_menu_anchor
 repository: https://github.com/selvan/draggable_menu_anchor
 issue_tracker: https://github.com/selvan/draggable_menu_anchor/issues

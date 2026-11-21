@@ -1,3 +1,9 @@
+## 1.0.1
+
+- First stable release; the API is unchanged from 0.2.0.
+- pub.dev metadata: MIT license, repository, issue tracker and topics.
+- README: install from pub.dev.
+
 ## 0.2.0
 
 - **Breaking:** `gap` is replaced by `alignment` (default
