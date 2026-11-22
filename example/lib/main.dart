@@ -1,4 +1,4 @@
-import 'package:draggable_menu_anchor/draggable_menu_anchor.dart';
+import 'package:draggable_menu_anchor/material.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(const ExampleApp());
@@ -49,52 +49,19 @@ class _TapAnywherePageState extends State<TapAnywherePage> {
     child: Text(label),
   );
 
-  /// A menu panel: the menus draw no surface of their own, so give them one.
-  /// [header] sits flush with its top and sides (no padding).
-  Widget _surface(
-    BuildContext context,
-    List<Widget> rows, {
-    Key? key,
-    Widget? header,
-  }) => Material(
-    key: key,
-    color: Theme.of(context).colorScheme.surfaceContainer,
-    elevation: 8,
-    borderRadius: BorderRadius.circular(8),
-    clipBehavior: Clip.antiAlias,
-    child: IntrinsicWidth(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          ?header,
-          Padding(
-            padding: EdgeInsets.only(top: header == null ? 4 : 0, bottom: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: rows,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-
   /// A row that opens a submenu beside the menu ([DraggableSubmenu]; it
   /// flips to the other side near the screen edge).
-  Widget _submenu(
-    BuildContext context,
-    String label,
-    IconData icon,
-    List<Widget> items,
-  ) => DraggableSubmenu(
-    menuChildren: <Widget>[_surface(context, items)],
-    builder: (context, submenu, _) => MenuItemButton(
-      leadingIcon: Icon(icon),
-      trailingIcon: const Icon(Icons.arrow_right),
-      onPressed: () => submenu.isOpen ? submenu.close() : submenu.open(),
-      child: Text(label),
-    ),
-  );
+  Widget _submenu(String label, IconData icon, List<Widget> items) =>
+      DraggableSubmenu(
+        // Styled by the app's MenuTheme, like Flutter's own menus.
+        menuChildren: <Widget>[DraggableMenuSurface(children: items)],
+        builder: (context, submenu, _) => MenuItemButton(
+          leadingIcon: Icon(icon),
+          trailingIcon: const Icon(Icons.arrow_right),
+          onPressed: () => submenu.isOpen ? submenu.close() : submenu.open(),
+          child: Text(label),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -102,29 +69,27 @@ class _TapAnywherePageState extends State<TapAnywherePage> {
       body: DraggableMenuAnchor(
         controller: _menu,
         menuChildren: <Widget>[
-          _surface(
-            context,
+          // The menu's panel, styled by the app's MenuTheme like Flutter's
+          // own menus.
+          DraggableMenuSurface(
             key: const ValueKey<String>('example-menu'),
             // A grip at the top. The whole menu drags (the default
             // `dragFrom: MenuDragFrom.anywhere`); the grip shows that it
             // can. With `dragFrom: MenuDragFrom.handle` only it would.
-            header: DraggableMenuGrip(
-              key: const ValueKey<String>('example-grip'),
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.55),
+            header: const DraggableMenuGrip(
+              key: ValueKey<String>('example-grip'),
             ),
-            <Widget>[
+            children: <Widget>[
               _item('Cut', Icons.content_cut),
               _item('Copy', Icons.content_copy),
               _item('Paste', Icons.content_paste),
               const Divider(height: 8),
-              _submenu(context, 'Insert', Icons.add_box_outlined, <Widget>[
+              _submenu('Insert', Icons.add_box_outlined, <Widget>[
                 _item('Text', Icons.title),
                 _item('Image', Icons.image_outlined),
                 _item('Shape', Icons.category_outlined),
               ]),
-              _submenu(context, 'Arrange', Icons.layers_outlined, <Widget>[
+              _submenu('Arrange', Icons.layers_outlined, <Widget>[
                 _item('Bring to front', Icons.flip_to_front),
                 _item('Send to back', Icons.flip_to_back),
               ]),

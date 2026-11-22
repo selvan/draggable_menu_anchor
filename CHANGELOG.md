@@ -1,5 +1,9 @@
 ## Unreleased
 
+- `DraggableMenuSurface` (`material.dart`): a menu panel styled exactly like
+  a `MenuAnchor`'s, from its `style`, the app's `MenuTheme` and Material 3's
+  defaults. Optional flush `header` (e.g. a `DraggableMenuGrip`); material
+  `SubmenuButton`s in it open beside the menu.
 - `DraggableMenuGrip`: a ready-made grip (a band of tiny staggered dots
   across the menu's width) that drags the menu. Colours, dot size, rows and
   padding are adjustable; any widget in a `DraggableMenuHandle` still works
@@ -13,8 +17,8 @@
 - `VerticalMenuScope` (new library `package:draggable_menu_anchor/material.dart`):
   material `SubmenuButton`s in a draggable menu open beside it and flip to
   the other side near the screen edge, as in a `MenuAnchor`'s menu.
-- Example: one screen, tap anywhere to open a menu with a grip and two
-  submenus (`DraggableSubmenu`s).
+- Example: one screen, tap anywhere to open a menu (a
+  `DraggableMenuSurface` with a grip) with two submenus (`DraggableSubmenu`s).
 
 ## 1.0.1
 

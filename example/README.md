@@ -4,6 +4,8 @@ A small app showing [`DraggableMenuAnchor`](../README.md):
 
 - **Tap anywhere** on the screen: a vertical menu opens at that point. Near
   an edge it's placed the way a `MenuAnchor` would be, kept on screen.
+- The menu and its submenus are `DraggableMenuSurface`s: styled by the
+  app's `MenuTheme`, like Flutter's own menus.
 - **Drag** the menu to move it anywhere (the dotted band along its top is a
   `DraggableMenuGrip`); it stays on screen.
 - **Insert** and **Arrange** open submenus beside it, flipping to the left

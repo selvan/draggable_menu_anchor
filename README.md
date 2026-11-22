@@ -13,7 +13,8 @@ menus are Flutter's; this package adds placement, size limits and dragging.
 
 - No dependencies beyond Flutter. The main library uses only
   `package:flutter/widgets.dart`; `package:draggable_menu_anchor/material.dart`
-  adds `VerticalMenuScope` for material submenus.
+  adds `DraggableMenuSurface` (a panel styled by your `MenuTheme`) and
+  `VerticalMenuScope` (material submenus).
 - No state-management assumptions: drive it with a `MenuController` and
   callbacks, from `setState`, MobX, Provider, Bloc or anything else.
 
@@ -92,8 +93,30 @@ class _PanelButtonState extends State<PanelButton> {
 }
 ```
 
-The menu draws **no surface of its own**: give `menuChildren` a background,
-for example a `Card` or a `Material` with a shape and elevation.
+The menu draws **no surface of its own**: give `menuChildren` a background.
+In a material app, `DraggableMenuSurface` (from `material.dart`) styles it
+from your `MenuTheme`, exactly like Flutter's own menus:
+
+```dart
+import 'package:draggable_menu_anchor/material.dart';
+
+DraggableMenuAnchor(
+  controller: _controller,
+  menuChildren: [
+    DraggableMenuSurface(
+      header: const DraggableMenuGrip(), // optional
+      children: [
+        MenuItemButton(onPressed: copy, child: const Text('Copy')),
+        MenuItemButton(onPressed: paste, child: const Text('Paste')),
+      ],
+    ),
+  ],
+  builder: /* … as above */,
+);
+```
+
+Otherwise use any widget, e.g. a `Card`, a `Material` with a shape and
+elevation, or a Cupertino-styled container.
 
 ## How it behaves
 
@@ -273,6 +296,24 @@ A submenu row for the menu, needing neither material nor Cupertino (see
 | `screenPadding` | `EdgeInsets.all(8)` | Space kept from the screen's safe area. |
 | `scrollable` | `true` | Whether contents taller than the screen scroll. |
 
+### `DraggableMenuSurface` (`material.dart`)
+A menu panel that looks like a `MenuAnchor`'s: its background, shadow and
+surface-tint colours, elevation, shape and side, padding, size limits and
+visual density come from `style`, then the app's `MenuTheme`, then
+Material 3's menu defaults, resolved the same way `MenuAnchor` does. It
+follows light/dark themes and any `MenuThemeData` you set.
+
+| Parameter | Default | |
+|---|---|---|
+| `children` | required | The rows (e.g. `MenuItemButton`, `SubmenuButton`), stretched to the widest. |
+| `header` | — | Above the rows, flush with the top and sides (e.g. `DraggableMenuGrip`). |
+| `style` | — | Overrides the `MenuTheme`'s style, as `MenuAnchor.style` does. |
+| `clipBehavior` | `Clip.hardEdge` | As `MenuAnchor.clipBehavior`. |
+
+`SubmenuButton`s in it open beside the menu (`VerticalMenuScope` is built
+in). Use it in `DraggableSubmenu`s too, so submenus match. It doesn't
+scroll by itself; the anchor scrolls it when it's taller than the screen.
+
 ### `VerticalMenuScope` (`material.dart`)
 `VerticalMenuScope(child: …)`: `SubmenuButton`s inside it open beside the
 menu and flip near the edge, as in a `MenuAnchor`'s menu (see
@@ -428,7 +469,7 @@ Stack(children: [
 | `alignment` / `alignmentOffset` | ✓ | ✓ |
 | Drag from a grip only | — | ✓ (`DraggableMenuHandle`, `DraggableMenuGrip`) |
 | Report / restore / remember position | — | ✓ |
-| Menu surface (background, elevation, padding) | `MenuStyle` | your `menuChildren` |
+| Menu surface (background, elevation, padding) | `MenuStyle` / `MenuTheme` | `DraggableMenuSurface` (same `MenuStyle` / `MenuTheme`), or your own |
 | Keyboard arrow-key traversal of items | ✓ | — |
 | Open/close animation | ✓ | — |
 
@@ -436,8 +477,8 @@ Stack(children: [
 
 - **Right-to-left:** `alignment` follows the text direction, but the
   push-in rules and the open `position` work the same in both directions.
-- **No open/close animation**, and no `MenuStyle`; style the contents
-  yourself.
+- **No open/close animation.** The anchor itself takes no `MenuStyle`;
+  style the contents, e.g. with `DraggableMenuSurface`.
 - **Display features** (hinge/fold areas) aren't avoided, unlike
   `MenuAnchor`.
 
