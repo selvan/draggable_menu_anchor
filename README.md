@@ -127,8 +127,8 @@ content is constrained, and has to fit itself into the width.
 ### Dragging
 - Drag **anywhere** on the menu to move it, or, with
   `dragFrom: MenuDragFrom.handle`, only from `DraggableMenuHandle`s you
-  place inside it (e.g. around a grip icon or title bar). It always stays
-  inside the screen.
+  place inside it (e.g. around a grip icon or title bar), or the ready-made
+  `DraggableMenuGrip`. It always stays inside the screen.
 - Drags follow the finger from where it went down, with no jump by the touch
   slop.
 - **Scrollables inside win drags along their own axis.** A horizontal list
@@ -284,6 +284,23 @@ never-opened `MenuAnchor`, which is what Flutter's submenus look for.
 required with `dragFrom: MenuDragFrom.handle` and harmless otherwise. It
 shows a "grab" cursor; outside a draggable menu it just shows its child.
 
+### `DraggableMenuGrip`
+A ready-made `DraggableMenuHandle`: a band of tiny staggered dots across
+the menu's width (each a light dot with a darker one beside it). Put it at
+the top of the menu, flush with its edges. Needs neither material nor
+Cupertino.
+
+| Parameter | Default | |
+|---|---|---|
+| `color` | `IconTheme` colour at 55% | The light dots. |
+| `shadowColor` | black at 70% | The darker dot beside each light one. |
+| `dotSize` | `1.5` | One dot's side; dots repeat every 4× across, rows every 2× down. |
+| `rows` | `4` | How many rows of dots. |
+| `padding` | `EdgeInsets.only(bottom: 4)` | Space around the band. |
+
+It fills the width it's given and is `rows × 2 × dotSize` tall, plus
+`padding`. For a grip of your own, wrap any widget in `DraggableMenuHandle`.
+
 ### `MenuDragFrom`
 `anywhere` or `handle`.
 
@@ -328,13 +345,29 @@ DraggableMenuAnchor(
 );
 ```
 
+**Add a grip.** The ready-made dotted band, or any widget of your own:
+```dart
+Card(
+  clipBehavior: Clip.antiAlias, // so the grip follows the rounded corners
+  child: IntrinsicWidth(
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      const DraggableMenuGrip(), // or DraggableMenuGrip(rows: 2, dotSize: 2, color: …)
+      // … rows
+    ]),
+  ),
+)
+
+// Your own grip: anything inside a DraggableMenuHandle drags the menu.
+const DraggableMenuHandle(child: Icon(Icons.drag_indicator))
+```
+
 **Drag only by a grip.**
 ```dart
 DraggableMenuAnchor(
   dragFrom: MenuDragFrom.handle,
   menuChildren: [
     Card(child: Column(children: [
-      const DraggableMenuHandle(child: Icon(Icons.drag_indicator)),
+      const DraggableMenuGrip(), // or a DraggableMenuHandle of your own
       // … content that doesn't move the menu
     ])),
   ],
@@ -393,7 +426,7 @@ Stack(children: [
 | Draggable after opening | — | ✓ |
 | Keeps position when content resizes | — (re-placed) | ✓ |
 | `alignment` / `alignmentOffset` | ✓ | ✓ |
-| Drag from a grip only | — | ✓ (`DraggableMenuHandle`) |
+| Drag from a grip only | — | ✓ (`DraggableMenuHandle`, `DraggableMenuGrip`) |
 | Report / restore / remember position | — | ✓ |
 | Menu surface (background, elevation, padding) | `MenuStyle` | your `menuChildren` |
 | Keyboard arrow-key traversal of items | ✓ | — |
@@ -411,8 +444,9 @@ Stack(children: [
 ## Example app
 
 [`example/`](example/) is one screen: tap anywhere to open a draggable
-vertical menu at that point, with two submenus (`DraggableSubmenu`s with
-material rows: they open beside it and flip near the edge).
+vertical menu at that point, with a `DraggableMenuGrip` along its top and
+two submenus (`DraggableSubmenu`s with material rows: they open beside it
+and flip near the edge).
 
 ```bash
 cd example

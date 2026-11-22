@@ -1,5 +1,9 @@
 ## Unreleased
 
+- `DraggableMenuGrip`: a ready-made grip (a band of tiny staggered dots
+  across the menu's width) that drags the menu. Colours, dot size, rows and
+  padding are adjustable; any widget in a `DraggableMenuHandle` still works
+  as a custom grip.
 - `DraggableSubmenu`: a submenu for the menu that needs neither material nor
   Cupertino. Opens beside its row and flips to the other side near the
   screen edge; part of the menu (outside taps, closing, siblings, nesting).
@@ -9,8 +13,8 @@
 - `VerticalMenuScope` (new library `package:draggable_menu_anchor/material.dart`):
   material `SubmenuButton`s in a draggable menu open beside it and flip to
   the other side near the screen edge, as in a `MenuAnchor`'s menu.
-- Example: one screen, tap anywhere to open a menu with two submenus
-  (`DraggableSubmenu`s).
+- Example: one screen, tap anywhere to open a menu with a grip and two
+  submenus (`DraggableSubmenu`s).
 
 ## 1.0.1
 

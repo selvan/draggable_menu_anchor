@@ -28,8 +28,22 @@ void main() {
 
     await tester.drag(find.text('Copy'), const Offset(150, 100));
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(menu), tap + const Offset(150, 100));
+    expect(
+      tester.getTopLeft(menu),
+      offsetMoreOrLessEquals(tap + const Offset(150, 100)),
+    );
     expect(menu, findsOneWidget);
+
+    // The grip drags it too.
+    final grip = find.byKey(const ValueKey<String>('example-grip'));
+    expect(grip, findsOneWidget);
+    final before = tester.getTopLeft(menu);
+    await tester.drag(grip, const Offset(-60, 40));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getTopLeft(menu),
+      offsetMoreOrLessEquals(before + const Offset(-60, 40)),
+    );
 
     // A tap outside it closes it; the next one opens it again, there.
     await tester.tapAt(const Offset(780, 580));

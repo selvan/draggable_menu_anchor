@@ -4,5 +4,6 @@
 library;
 
 export 'src/draggable_menu_anchor.dart';
+export 'src/draggable_menu_grip.dart';
 export 'src/draggable_submenu.dart';
 export 'src/menu_placement.dart';
