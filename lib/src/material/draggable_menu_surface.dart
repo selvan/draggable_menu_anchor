@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'vertical_menu_scope.dart';
 
@@ -30,7 +30,7 @@ import 'vertical_menu_scope.dart';
 /// stretched to that width), inside the style's padding. [header] (e.g. a
 /// `DraggableMenuGrip`) sits above them, flush with the panel's top and
 /// sides. `SubmenuButton`s in it open beside the menu and flip near the
-/// screen edge: a [VerticalMenuScope] is built in.
+/// screen edge: a [VerticalMenuScope] is built in (see [verticalSubmenus]).
 ///
 /// Unlike a [MenuAnchor]'s panel it doesn't scroll by itself: the
 /// `DraggableMenuAnchor` (with `scrollable: true`, the default) scrolls it
@@ -42,6 +42,7 @@ class DraggableMenuSurface extends StatelessWidget {
     this.header,
     this.style,
     this.clipBehavior = Clip.hardEdge,
+    this.verticalSubmenus = true,
   });
 
   /// The menu's rows, e.g. [MenuItemButton]s and [SubmenuButton]s.
@@ -61,6 +62,14 @@ class DraggableMenuSurface extends StatelessWidget {
   /// How the panel clips its contents (as [MenuAnchor.clipBehavior]).
   final Clip clipBehavior;
 
+  /// Whether [SubmenuButton]s in it open beside the menu, as in a
+  /// [MenuAnchor]'s menu (a [VerticalMenuScope] around the rows).
+  ///
+  /// Turn it off when the rows hold [MenuAnchor]s of their own (e.g.
+  /// confirmation pop-ups) that should keep their usual placement: inside a
+  /// [VerticalMenuScope] Flutter places a [MenuAnchor] like a submenu.
+  final bool verticalSubmenus;
+
   @override
   Widget build(BuildContext context) {
     final MenuStyle? themeStyle = MenuTheme.of(context).style;
@@ -79,9 +88,8 @@ class DraggableMenuSurface extends StatelessWidget {
     final fixedSize = resolve<Size?>((s) => s?.fixedSize);
     final maximumSize = resolve<Size?>((s) => s?.maximumSize);
     final side = resolve<BorderSide?>((s) => s?.side);
-    final shape = resolve<OutlinedBorder?>(
-      (s) => s?.shape,
-    )!.copyWith(side: side);
+    final shape = resolve<OutlinedBorder?>((s) => s?.shape)!
+        .copyWith(side: side);
     final visualDensity =
         effective((s) => s?.visualDensity) ?? VisualDensity.standard;
     final padding =
@@ -119,6 +127,22 @@ class DraggableMenuSurface extends StatelessWidget {
       }
     }
 
+    final Widget content = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        ?header,
+        Padding(
+          padding: resolvedPadding,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ],
+    );
+
     return ConstrainedBox(
       constraints: constraints,
       child: IntrinsicWidth(
@@ -132,23 +156,7 @@ class DraggableMenuSurface extends StatelessWidget {
               ? MaterialType.transparency
               : MaterialType.canvas,
           clipBehavior: clipBehavior,
-          child: VerticalMenuScope(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                ?header,
-                Padding(
-                  padding: resolvedPadding,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: children,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          child: verticalSubmenus ? VerticalMenuScope(child: content) : content,
         ),
       ),
     );

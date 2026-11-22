@@ -1,9 +1,16 @@
 ## Unreleased
 
+- **Requires Flutter 3.47 / Dart 3.13.** The `material.dart` helpers
+  (`DraggableMenuSurface`, `VerticalMenuScope`) are built on
+  [`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
+  library package, so they follow a `material_ui` app's theme. The package
+  now depends on `material_ui`; the main library still uses only
+  `package:flutter/widgets.dart`. The example uses `material_ui`.
 - `DraggableMenuSurface` (`material.dart`): a menu panel styled exactly like
   a `MenuAnchor`'s, from its `style`, the app's `MenuTheme` and Material 3's
   defaults. Optional flush `header` (e.g. a `DraggableMenuGrip`); material
-  `SubmenuButton`s in it open beside the menu.
+  `SubmenuButton`s in it open beside the menu (`verticalSubmenus`, on by
+  default).
 - `DraggableMenuGrip`: a ready-made grip (a band of tiny staggered dots
   across the menu's width) that drags the menu. Colours, dot size, rows and
   padding are adjustable; any widget in a `DraggableMenuHandle` still works

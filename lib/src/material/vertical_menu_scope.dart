@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Makes the [SubmenuButton]s inside [child] behave as items of a vertical
 /// menu, as they do in a [MenuAnchor]'s menu: their submenus open beside the

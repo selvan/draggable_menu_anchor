@@ -14,12 +14,15 @@ topics:
   - widget
 
 environment:
-  sdk: '^3.8.0'
-  flutter: ">=3.32.0"
+  sdk: '^3.13.0'
+  flutter: ">=3.47.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  # Only for `package:draggable_menu_anchor/material.dart`; the main library
+  # uses package:flutter/widgets.dart alone.
+  material_ui: ^1.7.0
 
 dev_dependencies:
   flutter_test:

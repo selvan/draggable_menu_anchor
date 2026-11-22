@@ -1,5 +1,5 @@
 import 'package:draggable_menu_anchor/material.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -229,6 +229,53 @@ void main() {
     expect(
       tester.getRect(find.widgetWithText(MenuItemButton, 'Image')).left,
       greaterThanOrEqualTo(tester.getRect(surface).right - 1),
+    );
+  });
+
+  testWidgets('verticalSubmenus: false leaves MenuAnchor placement alone', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final controller = MenuController();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DraggableMenuAnchor(
+            controller: controller,
+            menuChildren: <Widget>[
+              DraggableMenuSurface(
+                key: surfaceKey,
+                verticalSubmenus: false,
+                children: <Widget>[
+                  SubmenuButton(
+                    menuChildren: <Widget>[
+                      MenuItemButton(
+                        onPressed: () {},
+                        child: const Text('Image'),
+                      ),
+                    ],
+                    child: const Text('Insert'),
+                  ),
+                ],
+              ),
+            ],
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      ),
+    );
+    controller.open(position: const Offset(50, 50));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    // Without the scope a SubmenuButton opens below its button (as a menu
+    // bar's), so a MenuAnchor in the rows keeps its own placement too.
+    final insert = tester.getRect(find.widgetWithText(SubmenuButton, 'Insert'));
+    expect(
+      tester.getRect(find.widgetWithText(MenuItemButton, 'Image')).top,
+      greaterThanOrEqualTo(insert.bottom - 1),
     );
   });
 }

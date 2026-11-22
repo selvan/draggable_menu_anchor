@@ -11,10 +11,13 @@ It's built on Flutter's own [`RawMenuAnchor`][raw], the base that
 `MenuAnchor` itself is built on. Opening, closing, outside taps and nested
 menus are Flutter's; this package adds placement, size limits and dragging.
 
-- No dependencies beyond Flutter. The main library uses only
-  `package:flutter/widgets.dart`; `package:draggable_menu_anchor/material.dart`
-  adds `DraggableMenuSurface` (a panel styled by your `MenuTheme`) and
-  `VerticalMenuScope` (material submenus).
+- Design-neutral core: the main library uses only
+  `package:flutter/widgets.dart`, so it works with material, Cupertino or
+  your own widgets. `package:draggable_menu_anchor/material.dart` adds
+  `DraggableMenuSurface` (a panel styled by your `MenuTheme`) and
+  `VerticalMenuScope` (material submenus) for apps on
+  [`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
+  library package.
 - No state-management assumptions: drive it with a `MenuController` and
   callbacks, from `setState`, MobX, Provider, Bloc or anything else.
 
@@ -48,7 +51,9 @@ dependencies:
 import 'package:draggable_menu_anchor/draggable_menu_anchor.dart';
 ```
 
-Requires Flutter 3.32 or later (`RawMenuAnchor`).
+Requires Flutter 3.47 or later (Dart 3.13). The package depends on
+`material_ui` for its `material.dart` helpers; the main library doesn't use
+it.
 
 ## Quick start
 
@@ -95,7 +100,9 @@ class _PanelButtonState extends State<PanelButton> {
 
 The menu draws **no surface of its own**: give `menuChildren` a background.
 In a material app, `DraggableMenuSurface` (from `material.dart`) styles it
-from your `MenuTheme`, exactly like Flutter's own menus:
+from your `MenuTheme`, exactly like Flutter's own menus. It's built on
+`material_ui` (`import 'package:material_ui/material_ui.dart'` in your app),
+so it reads the theme a `material_ui` `MaterialApp` provides:
 
 ```dart
 import 'package:draggable_menu_anchor/material.dart';
@@ -263,6 +270,16 @@ Material(
 )
 ```
 
+### Material helpers and `material_ui`
+`DraggableMenuSurface` and `VerticalMenuScope` use
+[`material_ui`](https://pub.dev/packages/material_ui), Flutter's Material
+library as a package, and work with its `MaterialApp`, `Theme`,
+`MenuTheme`, `MenuItemButton` and `SubmenuButton`. An app still on the
+built-in `package:flutter/material.dart` has separate copies of those
+types: the helpers wouldn't see its theme. Such apps can use everything
+else in the package (anchor, submenu, grip) and give the menu a surface of
+their own.
+
 ## API
 
 ### `DraggableMenuAnchor`
@@ -315,6 +332,7 @@ follows light/dark themes and any `MenuThemeData` you set.
 | `header` | — | Above the rows, flush with the top and sides (e.g. `DraggableMenuGrip`). |
 | `style` | — | Overrides the `MenuTheme`'s style, as `MenuAnchor.style` does. |
 | `clipBehavior` | `Clip.hardEdge` | As `MenuAnchor.clipBehavior`. |
+| `verticalSubmenus` | `true` | `SubmenuButton`s open beside the menu. Turn off if the rows hold `MenuAnchor`s that should keep their own placement. |
 
 `SubmenuButton`s in it open beside the menu (`VerticalMenuScope` is built
 in). Use it in `DraggableSubmenu`s too, so submenus match. It doesn't
