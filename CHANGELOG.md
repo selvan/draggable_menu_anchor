@@ -18,7 +18,8 @@
   material `SubmenuButton`s in a draggable menu open beside it and flip to
   the other side near the screen edge, as in a `MenuAnchor`'s menu.
 - Example: one screen, tap anywhere to open a menu (a
-  `DraggableMenuSurface` with a grip) with two submenus (`DraggableSubmenu`s).
+  `DraggableMenuSurface` with a grip) with two submenus (`DraggableSubmenu`s),
+  and a light/dark switch showing it follow the theme.
 
 ## 1.0.1
 

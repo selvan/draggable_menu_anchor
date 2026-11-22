@@ -3,26 +3,42 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const ExampleApp());
 
-class ExampleApp extends StatelessWidget {
+class ExampleApp extends StatefulWidget {
   const ExampleApp({super.key});
+
+  @override
+  State<ExampleApp> createState() => _ExampleAppState();
+}
+
+class _ExampleAppState extends State<ExampleApp> {
+  ThemeMode _mode = ThemeMode.dark;
+
+  void _toggleTheme() => setState(
+    () => _mode = _mode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
+  );
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'draggable_menu_anchor',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      theme: ThemeData(colorSchemeSeed: Colors.indigo),
+      darkTheme: ThemeData(
         colorSchemeSeed: Colors.indigo,
         brightness: Brightness.dark,
       ),
-      home: const TapAnywherePage(),
+      themeMode: _mode,
+      home: TapAnywherePage(onToggleTheme: _toggleTheme),
     );
   }
 }
 
 /// A full-screen pane: tap anywhere to open a draggable menu at that point.
 class TapAnywherePage extends StatefulWidget {
-  const TapAnywherePage({super.key});
+  const TapAnywherePage({super.key, this.onToggleTheme});
+
+  /// Switches between the light and dark theme.
+  final VoidCallback? onToggleTheme;
 
   @override
   State<TapAnywherePage> createState() => _TapAnywherePageState();
@@ -65,6 +81,7 @@ class _TapAnywherePageState extends State<TapAnywherePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: DraggableMenuAnchor(
         controller: _menu,
@@ -97,26 +114,50 @@ class _TapAnywherePageState extends State<TapAnywherePage> {
           ),
         ],
         // The anchor is the whole pane: the menu opens where it's tapped.
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapUp: _onTap,
-          child: SizedBox.expand(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    'Tap anywhere',
-                    style: Theme.of(context).textTheme.headlineMedium,
+        child: Stack(
+          children: <Widget>[
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: _onTap,
+              child: SizedBox.expand(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        'Tap anywhere',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Drag the menu to move it · tap outside to close',
+                      ),
+                      const SizedBox(height: 24),
+                      Text(_chosen, key: const ValueKey<String>('chosen')),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  const Text('Drag the menu to move it · tap outside to close'),
-                  const SizedBox(height: 24),
-                  Text(_chosen, key: const ValueKey<String>('chosen')),
-                ],
+                ),
               ),
             ),
-          ),
+            // Light/dark switch. It's on the pane (the anchor), so tapping it
+            // leaves an open menu open: watch the menu, its grip and its
+            // submenus restyle with the theme.
+            Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: IconButton.filledTonal(
+                    key: const ValueKey<String>('theme-toggle'),
+                    tooltip: isDark ? 'Light mode' : 'Dark mode',
+                    icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+                    onPressed: widget.onToggleTheme,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

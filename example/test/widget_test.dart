@@ -1,3 +1,4 @@
+import 'package:draggable_menu_anchor/material.dart';
 import 'package:draggable_menu_anchor_example/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -110,5 +111,45 @@ void main() {
     final image = tester.getRect(find.widgetWithText(MenuItemButton, 'Image'));
     // On the menu's left, not pushed over it.
     expect(image.right, lessThanOrEqualTo(menuRect.left + 1));
+  });
+
+  testWidgets('the theme switch restyles the open menu and its submenu', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    final toggle = find.byKey(const ValueKey<String>('theme-toggle'));
+
+    Color? panelColor(Finder panel) => tester
+        .widget<Material>(
+          find.descendant(of: panel, matching: find.byType(Material)).first,
+        )
+        .color;
+    Color surfaceContainer(Brightness brightness) => ThemeData(
+      colorSchemeSeed: Colors.indigo,
+      brightness: brightness,
+    ).colorScheme.surfaceContainer;
+
+    await tester.tapAt(const Offset(100, 100));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    final submenu = find.ancestor(
+      of: find.text('Image'),
+      matching: find.byType(DraggableMenuSurface),
+    );
+    expect(panelColor(menu), surfaceContainer(Brightness.dark));
+    expect(panelColor(submenu), surfaceContainer(Brightness.dark));
+
+    // The switch is on the anchor: tapping it leaves the menu open.
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(menu, findsOneWidget);
+    expect(find.text('Image'), findsOneWidget);
+    expect(panelColor(menu), surfaceContainer(Brightness.light));
+    expect(panelColor(submenu), surfaceContainer(Brightness.light));
+
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(panelColor(menu), surfaceContainer(Brightness.dark));
   });
 }

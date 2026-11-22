@@ -487,7 +487,8 @@ Stack(children: [
 [`example/`](example/) is one screen: tap anywhere to open a draggable
 vertical menu at that point, with a `DraggableMenuGrip` along its top and
 two submenus (`DraggableSubmenu`s with material rows: they open beside it
-and flip near the edge).
+and flip near the edge). A light/dark switch shows the menu following the
+app's theme.
 
 ```bash
 cd example
