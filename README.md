@@ -11,7 +11,9 @@ It's built on Flutter's own [`RawMenuAnchor`][raw], the base that
 `MenuAnchor` itself is built on. Opening, closing, outside taps and nested
 menus are Flutter's; this package adds placement, size limits and dragging.
 
-- No dependencies beyond Flutter (only `package:flutter/widgets.dart`).
+- No dependencies beyond Flutter. The main library uses only
+  `package:flutter/widgets.dart`; `package:draggable_menu_anchor/material.dart`
+  adds `VerticalMenuScope` for material submenus.
 - No state-management assumptions: drive it with a `MenuController` and
   callbacks, from `setState`, MobX, Provider, Bloc or anything else.
 
@@ -156,6 +158,9 @@ screen's, for the usual full-screen overlay).
 ### Closing
 - **Tap outside:** closes it. The tap is absorbed by default
   (`consumeOutsideTap`), so it doesn't also press what's underneath.
+  As with any Flutter menu, the tap has to land on something hit-testable
+  (your page's `Scaffold`, a `ColoredBox` background, …), and a tap on the
+  anchor itself isn't "outside".
 - **Esc** (a `DismissIntent` from a focused widget inside the menu): closes it.
 - **`controller.close()`** from code.
 - **`onClose`** fires in every case, so you can sync your own state.
@@ -166,6 +171,68 @@ A `MenuAnchor` (or another `DraggableMenuAnchor`) opened from inside
 - tapping in it doesn't count as outside;
 - closing the outer menu closes it;
 - a tap outside everything closes them all, as Flutter's nested menus do.
+
+### Submenus
+Two ways, both open **beside** the menu and **flip to the other side** near
+the screen edge:
+
+**`DraggableSubmenu`**: the package's own, for any design (material,
+Cupertino or custom). Put it in the menu as a row; it draws nothing itself.
+
+```dart
+DraggableSubmenu(
+  menuChildren: [
+    MySurface(child: Column(children: [/* rows */])),
+  ],
+  // With `child` alone, a tap on the row toggles the submenu:
+  child: const MyRow(label: 'Insert'),
+)
+
+// Or, for a row that handles its own taps (e.g. a MenuItemButton):
+DraggableSubmenu(
+  menuChildren: [/* … */],
+  builder: (context, submenu, _) => MenuItemButton(
+    trailingIcon: const Icon(Icons.arrow_right),
+    onPressed: () => submenu.isOpen ? submenu.close() : submenu.open(),
+    child: const Text('Insert'),
+  ),
+)
+```
+
+- Opening one closes any other open submenu of the menu.
+- Taps in it aren't "outside"; closing or **dragging** the menu closes it;
+  a tap outside everything closes them all; Esc closes just the submenu.
+- Submenus nest: a `DraggableSubmenu` in `menuChildren` opens beside it.
+- Choosing an item closes nothing by itself: close the menu when an item
+  is chosen.
+- Not built in (unlike `SubmenuButton`): opening on hover, arrow-key
+  navigation, styling.
+
+**Material `SubmenuButton` + `VerticalMenuScope`** (from `material.dart`):
+a `SubmenuButton` learns how to open from the `MenuAnchor` around it. A
+draggable menu isn't one, so on its own a `SubmenuButton` there acts like
+an item of a menu bar: its submenu opens **below** it. Wrap the menu's
+contents in `VerticalMenuScope` and they behave as in a `MenuAnchor`'s menu,
+with `SubmenuButton`'s hover, keyboard and styling.
+
+```dart
+import 'package:draggable_menu_anchor/material.dart';
+
+Material(
+  elevation: 8,
+  child: VerticalMenuScope(
+    child: IntrinsicWidth(
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        MenuItemButton(onPressed: copy, child: const Text('Copy')),
+        SubmenuButton(
+          menuChildren: [MenuItemButton(onPressed: addImage, child: const Text('Image'))],
+          child: const Text('Insert'),
+        ),
+      ]),
+    ),
+  ),
+)
+```
 
 ## API
 
@@ -191,6 +258,27 @@ A `MenuAnchor` (or another `DraggableMenuAnchor`) opened from inside
 | `alignmentOffset` | `Offset(0, 6)` | Added to that point; its `dy` is also the gap when flipped above the anchor. |
 | `useRootOverlay` | `false` | Show the menu in the root `Overlay` (see `RawMenuAnchor.useRootOverlay`). |
 
+### `DraggableSubmenu`
+A submenu row for the menu, needing neither material nor Cupertino (see
+[Submenus](#submenus)).
+
+| Parameter | Default | |
+|---|---|---|
+| `menuChildren` | required | The submenu's contents, in a column. |
+| `child` | — | The row. With no `builder`, a tap on it toggles the submenu. |
+| `builder` | — | Builds the row: `(context, controller, child)`. |
+| `controller` | created internally | A `MenuController` to `open()` / `close()` it. |
+| `onOpen` / `onClose` | — | Called when it opens / closes. |
+| `offset` | `Offset.zero` | `dx`: gap from the row's side; `dy`: shift down. |
+| `screenPadding` | `EdgeInsets.all(8)` | Space kept from the screen's safe area. |
+| `scrollable` | `true` | Whether contents taller than the screen scroll. |
+
+### `VerticalMenuScope` (`material.dart`)
+`VerticalMenuScope(child: …)`: `SubmenuButton`s inside it open beside the
+menu and flip near the edge, as in a `MenuAnchor`'s menu (see
+[Submenus](#submenus)). It places its child inside an empty,
+never-opened `MenuAnchor`, which is what Flutter's submenus look for.
+
 ### `DraggableMenuHandle`
 `DraggableMenuHandle(child: …)`: a part of the menu that drags it. It's
 required with `dragFrom: MenuDragFrom.handle` and harmless otherwise. It
@@ -213,6 +301,12 @@ final topLeft = menuAnchorPosition(
   alignmentOffset: Offset.zero,      // MenuAnchor's default
 );
 ```
+
+### `submenuPosition(...)`
+Where `DraggableSubmenu` puts a submenu, as a pure function: beside the
+`anchor` row (right first, or left in right-to-left), flipped to the other
+side when it doesn't fit, else pushed in; level with the row's top, or
+growing upwards from its bottom near the bottom edge.
 
 ### `keepInside(topLeft, size, bounds)`
 `topLeft` moved the least needed for a `size` box to fit in `bounds`. A box
@@ -316,14 +410,9 @@ Stack(children: [
 
 ## Example app
 
-[`example/`](example/) has:
-- buttons in the centre and the four corners, each opening a draggable panel
-  at the tap point;
-- "Grip only (remembers spot)": `dragFrom: handle` + `rememberPosition`;
-- "Right of button": opened from code with `alignment: topEnd`;
-- "Tall menu": content taller than the screen, scrolling;
-- a nested `MenuAnchor` inside the panel;
-- a log of the callbacks and the latest `onMoved` position.
+[`example/`](example/) is one screen: tap anywhere to open a draggable
+vertical menu at that point, with two submenus (`DraggableSubmenu`s with
+material rows: they open beside it and flip near the edge).
 
 ```bash
 cd example

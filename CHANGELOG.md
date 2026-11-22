@@ -1,3 +1,17 @@
+## Unreleased
+
+- `DraggableSubmenu`: a submenu for the menu that needs neither material nor
+  Cupertino. Opens beside its row and flips to the other side near the
+  screen edge; part of the menu (outside taps, closing, siblings, nesting).
+- `submenuPosition`: its placement rules as a pure function.
+- Dragging the menu now closes its open submenus (they'd otherwise stay
+  where they opened).
+- `VerticalMenuScope` (new library `package:draggable_menu_anchor/material.dart`):
+  material `SubmenuButton`s in a draggable menu open beside it and flip to
+  the other side near the screen edge, as in a `MenuAnchor`'s menu.
+- Example: one screen, tap anywhere to open a menu with two submenus
+  (`DraggableSubmenu`s).
+
 ## 1.0.1
 
 - First stable release; the API is unchanged from 0.2.0.

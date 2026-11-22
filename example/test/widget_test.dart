@@ -3,113 +3,98 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('opens at the tap, drags, closes on an outside tap', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(800, 900);
+  final menu = find.byKey(const ValueKey<String>('example-menu'));
+  final chosen = find.byKey(const ValueKey<String>('chosen'));
+
+  Future<void> pumpApp(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(800, 600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(const ExampleApp());
+  }
 
-    final button = find.widgetWithText(FilledButton, 'Open panel');
-    final tap = tester.getTopLeft(button) + const Offset(20, 10);
+  testWidgets('opens at the tap point, drags, closes on an outside tap', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    expect(find.text('Tap anywhere'), findsOneWidget);
+    expect(menu, findsNothing);
+
+    const tap = Offset(120, 90);
     await tester.tapAt(tap);
     await tester.pumpAndSettle();
-    final panel = find.byKey(const ValueKey<String>('demo-panel'));
-    expect(panel, findsOneWidget);
-    expect(tester.getTopLeft(panel), tap);
-    expect(find.text('Open panel: opened'), findsOneWidget);
+    expect(menu, findsOneWidget);
+    expect(tester.getTopLeft(menu), tap);
 
-    await tester.drag(
-      find.byIcon(Icons.drag_indicator),
-      const Offset(-100, 80),
-    );
+    await tester.drag(find.text('Copy'), const Offset(150, 100));
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(panel), tap + const Offset(-100, 80));
-    expect(find.text('Open panel: drag ended'), findsOneWidget);
+    expect(tester.getTopLeft(menu), tap + const Offset(150, 100));
+    expect(menu, findsOneWidget);
 
-    await tester.tapAt(const Offset(780, 880));
+    // A tap outside it closes it; the next one opens it again, there.
+    await tester.tapAt(const Offset(780, 580));
     await tester.pumpAndSettle();
-    expect(panel, findsNothing);
-    expect(find.text('Open panel: closed'), findsOneWidget);
+    expect(menu, findsNothing);
+    await tester.tapAt(const Offset(300, 200));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(menu), const Offset(300, 200));
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+    expect(menu, findsNothing);
+    expect(chosen, findsOneWidget);
+    expect(tester.widget<Text>(chosen).data, 'Nothing chosen yet');
   });
 
-  testWidgets('tall content fits the screen and scrolls', (tester) async {
-    tester.view.physicalSize = const Size(800, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(const ExampleApp());
-
-    await tester.tap(find.widgetWithText(FilledButton, 'Tall menu'));
-    await tester.pumpAndSettle();
-    final tall = find.byKey(const ValueKey<String>('tall-panel'));
-    final scroll = find
-        .ancestor(of: tall, matching: find.byType(Scrollable))
-        .first;
-    expect(tester.getSize(scroll).height, lessThanOrEqualTo(900 - 16));
-    expect(
-      tester.state<ScrollableState>(scroll).position.maxScrollExtent,
-      greaterThan(0),
-    );
-  });
-
-  testWidgets('Right of button: opens beside the button', (tester) async {
-    // Wide enough for the 300px panel to fit right of the centred button.
-    tester.view.physicalSize = const Size(1100, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(const ExampleApp());
-
-    final button = find.widgetWithText(FilledButton, 'Right of button');
-    final buttonRect = tester.getRect(button);
-    await tester.tap(button);
-    await tester.pumpAndSettle();
-    final panel = find.byKey(const ValueKey<String>('demo-panel'));
-    expect(
-      tester.getTopLeft(panel),
-      Offset(buttonRect.right + 8, buttonRect.top),
-    );
-  });
-
-  testWidgets('Grip only: body drags do nothing; reopens where left', (
+  testWidgets('submenus open beside it; choosing closes everything', (
     tester,
   ) async {
-    tester.view.physicalSize = const Size(800, 1000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(const ExampleApp());
+    await pumpApp(tester);
+    await tester.tapAt(const Offset(100, 100));
+    await tester.pumpAndSettle();
 
-    final button = find.widgetWithText(
-      FilledButton,
-      'Grip only (remembers spot)',
+    expect(find.text('Image'), findsNothing);
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    expect(find.text('Image'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Image')).dx,
+      greaterThan(tester.getTopRight(menu).dx - 1),
     );
-    await tester.tap(button);
-    await tester.pumpAndSettle();
-    final panel = find.byKey(const ValueKey<String>('demo-panel'));
-    final start = tester.getTopLeft(panel);
 
-    // The hint text inside the panel isn't a handle.
-    await tester.drag(
-      find.descendant(
-        of: panel,
-        matching: find.textContaining('Drag anywhere'),
-      ),
-      const Offset(0, 80),
-    );
+    await tester.tap(find.text('Image'));
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(panel), start);
+    expect(menu, findsNothing);
+    expect(find.text('Image'), findsNothing);
+    expect(tester.widget<Text>(chosen).data, 'Chosen: Image');
 
-    await tester.drag(find.byIcon(Icons.drag_indicator), const Offset(-60, 90));
+    // The other submenu, from a tap near the bottom-right corner: the menu
+    // is pushed back inside the screen.
+    await tester.tapAt(const Offset(790, 590));
     await tester.pumpAndSettle();
-    final left = tester.getTopLeft(panel);
-    expect(left, start + const Offset(-60, 90));
-    expect(find.textContaining('onMoved: Grip only'), findsOneWidget);
+    final rect = tester.getRect(menu);
+    expect(rect.right, lessThanOrEqualTo(800));
+    expect(rect.bottom, lessThanOrEqualTo(600));
+    await tester.tap(find.text('Arrange'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Send to back'));
+    await tester.pumpAndSettle();
+    expect(menu, findsNothing);
+    expect(tester.widget<Text>(chosen).data, 'Chosen: Send to back');
+  });
 
-    await tester.tapAt(const Offset(790, 990)); // outside: close
+  testWidgets('near the right edge a submenu flips to the left', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+    await tester.tapAt(const Offset(760, 100));
     await tester.pumpAndSettle();
-    expect(panel, findsNothing);
-    await tester.tap(button);
+    final menuRect = tester.getRect(menu);
+    expect(menuRect.right, lessThanOrEqualTo(800));
+
+    await tester.tap(find.text('Insert'));
     await tester.pumpAndSettle();
-    expect(tester.getTopLeft(panel), left);
+    final image = tester.getRect(find.widgetWithText(MenuItemButton, 'Image'));
+    // On the menu's left, not pushed over it.
+    expect(image.right, lessThanOrEqualTo(menuRect.left + 1));
   });
 }

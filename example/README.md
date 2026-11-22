@@ -2,17 +2,14 @@
 
 A small app showing [`DraggableMenuAnchor`](../README.md):
 
-- **Open panel** (centre) and the four **corner** buttons open a draggable
-  panel at the point you tap. Near the bottom or a side it's placed the way
-  a `MenuAnchor` would be: above the button, pushed in from the edge.
-- Drag the panel anywhere; it stays on screen. The chip row inside scrolls
-  sideways; dragging it up/down moves the panel instead.
-- **More ▾** inside the panel opens a nested `MenuAnchor`, which counts as
-  part of the panel.
-- **Tall menu** opens content taller than the screen: it's limited to the
-  screen and scrolls.
-- The event log at the bottom shows `onOpen`, `onClose`, `onDragStart` and
-  `onDragEnd`.
+- **Tap anywhere** on the screen: a vertical menu opens at that point. Near
+  an edge it's placed the way a `MenuAnchor` would be, kept on screen.
+- **Drag** the menu to move it anywhere; it stays on screen.
+- **Insert** and **Arrange** open submenus beside it, flipping to the left
+  near the right edge (`DraggableSubmenu`s with material rows, part of the
+  same menu).
+- Choosing an item closes the menu and shows the choice; a tap outside the
+  menu just closes it.
 
 ```bash
 cd example

@@ -177,6 +177,13 @@ class _DraggableMenuAnchorState extends State<DraggableMenuAnchor> {
     widget.onMoved?.call(topLeft);
   }
 
+  /// Open submenus stay where they opened, so they close when the menu is
+  /// dragged away from them.
+  void _dragStarted() {
+    _controller.closeChildren();
+    widget.onDragStart?.call();
+  }
+
   void _dragBy(Offset delta) {
     final from = _placed;
     if (from == null) return;
@@ -226,7 +233,7 @@ class _DraggableMenuAnchorState extends State<DraggableMenuAnchor> {
     if (widget.draggable) {
       if (widget.dragFrom == MenuDragFrom.anywhere) {
         content = _MenuDragArea(
-          onStart: widget.onDragStart,
+          onStart: _dragStarted,
           onUpdate: _dragBy,
           onEnd: widget.onDragEnd,
           child: content,
@@ -234,7 +241,7 @@ class _DraggableMenuAnchorState extends State<DraggableMenuAnchor> {
       }
       // Handles work in both modes (in `anywhere` they're redundant).
       content = _DraggableMenuScope(
-        onStart: widget.onDragStart,
+        onStart: _dragStarted,
         onUpdate: _dragBy,
         onEnd: widget.onDragEnd,
         child: content,
