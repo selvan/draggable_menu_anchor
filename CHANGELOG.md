@@ -1,4 +1,4 @@
-## Unreleased
+## 2.0.0
 
 - **Requires Flutter 3.47 / Dart 3.13.** The `material.dart` helpers
   (`DraggableMenuSurface`, `VerticalMenuScope`) are built on

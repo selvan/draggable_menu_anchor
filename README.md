@@ -44,7 +44,7 @@ or in `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  draggable_menu_anchor: ^1.0.1
+  draggable_menu_anchor: ^2.0.0
 ```
 
 ```dart
