@@ -152,4 +152,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(panelColor(menu), surfaceContainer(Brightness.dark));
   });
+
+  testWidgets('tapping an open submenu\'s row closes it', (tester) async {
+    await pumpApp(tester);
+    await tester.tapAt(const Offset(100, 100));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    expect(find.text('Image'), findsOneWidget);
+
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    expect(find.text('Image'), findsNothing);
+    expect(menu, findsOneWidget);
+
+    // And again opens it.
+    await tester.tap(find.text('Insert'));
+    await tester.pumpAndSettle();
+    expect(find.text('Image'), findsOneWidget);
+  });
 }
+

@@ -74,6 +74,10 @@ class _TapAnywherePageState extends State<TapAnywherePage> {
         builder: (context, submenu, _) => MenuItemButton(
           leadingIcon: Icon(icon),
           trailingIcon: const Icon(Icons.arrow_right),
+          // A row that opens a submenu mustn't close menus when pressed
+          // (MenuItemButton's default), or a tap on an open submenu's row
+          // would close it and then open it again.
+          closeOnActivate: false,
           onPressed: () => submenu.isOpen ? submenu.close() : submenu.open(),
           child: Text(label),
         ),

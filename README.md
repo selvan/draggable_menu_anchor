@@ -216,11 +216,17 @@ DraggableSubmenu(
   menuChildren: [/* … */],
   builder: (context, submenu, _) => MenuItemButton(
     trailingIcon: const Icon(Icons.arrow_right),
+    closeOnActivate: false, // see below
     onPressed: () => submenu.isOpen ? submenu.close() : submenu.open(),
     child: const Text('Insert'),
   ),
 )
 ```
+
+With a `MenuItemButton` as the row, set `closeOnActivate: false`. By
+default a pressed `MenuItemButton` closes its menu's submenus before its
+`onPressed` runs, so a tap on an open submenu's row would close it and
+then open it again instead of closing it.
 
 - Opening one closes any other open submenu of the menu.
 - Taps in it aren't "outside"; closing or **dragging** the menu closes it;
