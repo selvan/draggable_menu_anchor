@@ -21,6 +21,7 @@ void main() {
     VoidCallback? onDragEnd,
     Offset? initialPosition,
     bool rememberPosition = false,
+    bool closeOnOutsideTap = true,
     TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.physicalSize = screen;
@@ -55,6 +56,7 @@ void main() {
                   onDragEnd: onDragEnd,
                   initialPosition: initialPosition,
                   rememberPosition: rememberPosition,
+                  closeOnOutsideTap: closeOnOutsideTap,
                   menuChildren: <Widget>[
                     Container(
                       key: menuKey,
@@ -137,6 +139,71 @@ void main() {
     expect(controller.isOpen, isFalse);
     expect(find.byKey(menuKey), findsNothing);
     expect(underneath, 0);
+  });
+
+  testWidgets('closeOnOutsideTap: false keeps it open; the page still works', (
+    tester,
+  ) async {
+    var underneath = 0;
+    final controller = await pump(
+      tester,
+      onUnderneathTap: () => underneath++,
+      closeOnOutsideTap: false,
+    );
+    await tester.tapAt(const Offset(60, 110));
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, isTrue);
+
+    // Outside taps leave it open and reach what's underneath.
+    await tester.tapAt(const Offset(390, 790));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(20, 600));
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, isTrue);
+    expect(find.byKey(menuKey), findsOneWidget);
+    expect(underneath, 2);
+
+    // It can still be dragged, and closed from code.
+    final before = menuRect(tester).topLeft;
+    await tester.drag(find.byKey(menuKey), const Offset(30, 40));
+    await tester.pumpAndSettle();
+    expect(menuRect(tester).topLeft, before + const Offset(30, 40));
+    controller.close();
+    await tester.pumpAndSettle();
+    expect(find.byKey(menuKey), findsNothing);
+  });
+
+  testWidgets('closeOnOutsideTap: false still closes open submenus', (
+    tester,
+  ) async {
+    final controller = await pump(
+      tester,
+      menuHeight: 100,
+      closeOnOutsideTap: false,
+      extra: <Widget>[
+        DraggableSubmenu(
+          menuChildren: const <Widget>[
+            SizedBox(
+              key: ValueKey<String>('sub'),
+              width: 100,
+              height: 50,
+              child: ColoredBox(color: Colors.green),
+            ),
+          ],
+          child: const SizedBox(width: 200, height: 40, child: Text('More')),
+        ),
+      ],
+    );
+    await tester.tapAt(const Offset(60, 110));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('More'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('sub')), findsOneWidget);
+
+    await tester.tapAt(const Offset(390, 790));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey<String>('sub')), findsNothing);
+    expect(controller.isOpen, isTrue);
   });
 
   testWidgets('a MenuAnchor opened inside counts as inside', (tester) async {

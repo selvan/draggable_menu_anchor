@@ -193,6 +193,10 @@ screen's, for the usual full-screen overlay).
   anchor itself isn't "outside".
 - **Esc** (a `DismissIntent` from a focused widget inside the menu): closes it.
 - **`controller.close()`** from code.
+- **`closeOnOutsideTap: false`:** outside taps leave the menu open and
+  reach the page underneath (they still close open submenus), e.g. for a
+  tool palette that stays up while the user works. Close it with
+  `controller.close()` or Esc.
 - **`onClose`** fires in every case, so you can sync your own state.
 
 ### Nested menus
@@ -298,6 +302,7 @@ their own.
 | `initialPosition` | — | Open at this top-left (kept inside the screen) instead of placing it. |
 | `rememberPosition` | `false` | Reopen where it was last. |
 | `consumeOutsideTap` | `true` | Whether the tap that closes the menu is kept from what's underneath. |
+| `closeOnOutsideTap` | `true` | Whether a tap outside closes the menu. `false`: it stays open (the page keeps working) until `controller.close()` or Esc. |
 | `scrollable` | `true` | Whether content taller than the screen scrolls. |
 | `screenPadding` | `EdgeInsets.all(8)` | Space kept between the menu and the screen's safe area. |
 | `alignment` | `AlignmentDirectional.bottomStart` | Without an open position: the point on the anchor where the menu's top-left starts. |

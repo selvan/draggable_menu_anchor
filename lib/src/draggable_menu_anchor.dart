@@ -20,7 +20,8 @@ enum MenuDragFrom {
 /// like a `MenuAnchor`:
 ///  * [MenuController.open] (optionally with a `position`, e.g. the tap
 ///    point, relative to the anchor) and [MenuController.close];
-///  * a tap outside closes it (absorbed when [consumeOutsideTap]);
+///  * a tap outside closes it (absorbed when [consumeOutsideTap]), unless
+///    [closeOnOutsideTap] is false;
 ///  * menus opened from inside it (e.g. a `MenuAnchor` in [menuChildren])
 ///    count as inside;
 ///  * a [DismissIntent] (Esc) from inside closes it.
@@ -59,6 +60,7 @@ class DraggableMenuAnchor extends StatefulWidget {
     this.draggable = true,
     this.dragFrom = MenuDragFrom.anywhere,
     this.consumeOutsideTap = true,
+    this.closeOnOutsideTap = true,
     this.scrollable = true,
     this.screenPadding = const EdgeInsets.all(8),
     this.alignment = AlignmentDirectional.bottomStart,
@@ -99,8 +101,16 @@ class DraggableMenuAnchor extends StatefulWidget {
   final MenuDragFrom dragFrom;
 
   /// Whether a tap outside, which closes the menu, is kept from reaching
-  /// whatever is underneath.
+  /// whatever is underneath. Only when [closeOnOutsideTap] is true.
   final bool consumeOutsideTap;
+
+  /// Whether a tap outside the menu closes it. When false, the menu stays
+  /// open until [MenuController.close] (or Esc), the page underneath keeps
+  /// working while it's open, and an outside tap only closes the menu's
+  /// open submenus.
+  final bool closeOnOutsideTap;
+
+  bool get _consumesOutsideTaps => closeOnOutsideTap && consumeOutsideTap;
 
   /// Whether content taller than the screen scrolls vertically.
   final bool scrollable;
@@ -249,8 +259,10 @@ class _DraggableMenuAnchorState extends State<DraggableMenuAnchor> {
     }
     final panel = TapRegion(
       groupId: info.tapRegionGroupId,
-      consumeOutsideTaps: _controller.isOpen && widget.consumeOutsideTap,
-      onTapOutside: (_) => _controller.close(),
+      consumeOutsideTaps: _controller.isOpen && widget._consumesOutsideTaps,
+      onTapOutside: (_) {
+        if (widget.closeOnOutsideTap) _controller.close();
+      },
       child: Actions(
         actions: <Type, Action<Intent>>{
           DismissIntent: CallbackAction<DismissIntent>(
@@ -282,7 +294,7 @@ class _DraggableMenuAnchorState extends State<DraggableMenuAnchor> {
   Widget build(BuildContext context) {
     return RawMenuAnchor(
       controller: _controller,
-      consumeOutsideTaps: widget.consumeOutsideTap,
+      consumeOutsideTaps: widget._consumesOutsideTaps,
       useRootOverlay: widget.useRootOverlay,
       onOpen: _handleOpen,
       onClose: widget.onClose,

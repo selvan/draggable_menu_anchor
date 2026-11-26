@@ -1,3 +1,9 @@
+## Unreleased
+
+- `DraggableMenuAnchor.closeOnOutsideTap` (default `true`): set it to
+  `false` to keep the menu open on outside taps (they then reach the page,
+  and still close open submenus) until `controller.close()` or Esc.
+
 ## 2.0.0
 
 - **Requires Flutter 3.47 / Dart 3.13.** The `material.dart` helpers
